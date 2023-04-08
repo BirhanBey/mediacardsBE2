@@ -12,7 +12,28 @@ class AccountController extends Controller
      */
     public function index()
     {
-        return Account::all();
+        $accounts = Account::with('urls')->get()->map(function ($account) {
+            $urls = $account->urls->map(function ($url) {
+                return [
+                    'id' => $url->id,
+                    'name' => $url->name,
+                    'link' => $url->link,
+                    'active' => $url->isActive,
+                ];
+            });
+            return [
+                'id_account' => $account->id,
+                'userName' => $account->userName,
+                'email' => $account->email,
+                'img' => $account->img,
+                'description' => $account->description,
+                'created_at' => $account->created_at,
+                'updated_at' => $account->updated_at,
+                'url' => $urls,
+            ];
+        });
+
+        return response()->json($accounts);
     }
 
     /**
@@ -24,9 +45,38 @@ class AccountController extends Controller
             "userName" => "required",
             "password" => "required",
             "email" => "required",
-            "url" => "required"
+            "name" => "required",
+            "link" => "required",
+            "active" => "required"
         ]);
-        return Account::create($request->all());
+
+        $url = [
+            "name" => $request->name,
+            "link" => $request->link,
+            "isActive" => $request->active
+        ];
+
+        $account = Account::create([
+            "userName" => $request->userName,
+            "password" => $request->password,
+            "email" => $request->email,
+            "image" => $request->img,
+            "description" => $request->description
+        ]);
+
+        $account->urls()->create($url);
+
+        if ($account && $url) {
+            return [
+                "type" => "success",
+                "message" => "Request is success"
+            ];
+        } else {
+            return [
+                "type" => "error",
+                "message" => "Request is error"
+            ];
+        }
     }
 
     /**
@@ -47,6 +97,19 @@ class AccountController extends Controller
         return $account;
     }
 
+    public function url_update(Request $request, string $id, string $url_id)
+    {
+        $account = Account::findOrFail($id);
+        $url = $account->urls()->find($url_id);
+
+        if (!$url) {
+            return response()->json(['message' => 'URL not found'], 404);
+        }
+
+        $url->update($request->all());
+        return $url;
+    }
+
     /**
      * search for a name
      */
@@ -62,5 +125,16 @@ class AccountController extends Controller
     public function destroy(string $id)
     {
         return Account::destroy($id);
+    }
+
+    public function url_destroy($id, $url_id)
+    {
+        $account = Account::findOrFail($id);
+        $url = $account->urls()->find($url_id);
+        if (!$url) {
+            return response()->json(['message' => 'Url not found'], 404);
+        }
+        $url->delete();
+        return response()->json(['message' => 'Url deleted successfully'], 200);
     }
 }
