@@ -83,21 +83,21 @@ class AccountController extends Controller
     {
         $name = $request->input('name');
         $link = $request->input('link');
-        $isActive = $request->input('isActive');
-    
+        $isActive = $request->input('active');
+
         if (!$name || !$link || !$isActive) {
             return response()->json([
                 'message' => 'Required parameters missing',
             ], 400);
         }
-    
+
         $account = Account::findOrFail($id);
         $account->urls()->create([
             "name" => $name,
             "link" => $link,
             "isActive" => $isActive
         ]);
-    
+
         return response()->json([
             'message' => 'New URL added successfully',
         ]);
@@ -158,6 +158,7 @@ class AccountController extends Controller
     public function search(string $name)
     {
         return Account::where('userName', 'like', '%' . $name . '%')->get();
+        
     }
 
 

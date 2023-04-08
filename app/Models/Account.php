@@ -18,7 +18,7 @@ class Account extends Model
 // app/Models/Url.php
 class Url extends Model
 {
-    protected $fillable = ['name', 'link', 'isActive'];
+    protected $fillable = ['name', 'link', 'active'];
     
     public function account()
     {
