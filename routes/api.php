@@ -31,6 +31,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/accounts', [AccountController::class, 'store']);
     Route::put('/accounts/{id}', [AccountController::class, 'update']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::put('/accounts/{id}/{url_id}', [AccountController::class, 'url_update']);
+    Route::delete('/accounts/{id}/urls/{url_id}', [AccountController::class, 'url_destroy']);
+
 });
 
 // Route::get('/accounts', [AccountController::class, 'index']);
