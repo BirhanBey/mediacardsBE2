@@ -79,12 +79,54 @@ class AccountController extends Controller
         }
     }
 
+    public function url_post(Request $request, $id)
+    {
+        $name = $request->input('name');
+        $link = $request->input('link');
+        $isActive = $request->input('isActive');
+    
+        if (!$name || !$link || !$isActive) {
+            return response()->json([
+                'message' => 'Required parameters missing',
+            ], 400);
+        }
+    
+        $account = Account::findOrFail($id);
+        $account->urls()->create([
+            "name" => $name,
+            "link" => $link,
+            "isActive" => $isActive
+        ]);
+    
+        return response()->json([
+            'message' => 'New URL added successfully',
+        ]);
+    }
+
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($id)
     {
-        return Account::findOrFail($id);
+        $account = Account::with('urls')->findOrFail($id);
+        $urls = $account->urls->map(function ($url) {
+            return [
+                'id' => $url->id,
+                'name' => $url->name,
+                'link' => $url->link,
+                'active' => $url->isActive,
+            ];
+        });
+        return response()->json([
+            'id_account' => $account->id,
+            'userName' => $account->userName,
+            'email' => $account->email,
+            'img' => $account->img,
+            'description' => $account->description,
+            'created_at' => $account->created_at,
+            'updated_at' => $account->updated_at,
+            'url' => $urls,
+        ]);
     }
 
     /**
