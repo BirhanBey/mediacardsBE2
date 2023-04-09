@@ -31,7 +31,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // delete item from url table
     Route::delete('/users/{id}/urls/{url_id}', [AuthController::class, 'url_destroy'])->middleware('auth', 'check_user_ownership');
     // user logout
-    Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth', 'check_user_ownership');
+    Route::post('/logout', [AuthController::class, 'logout']);
     
     // // sent a new record to accounts table
     // Route::post('/accounts', [AccountController::class, 'store']);

@@ -22,11 +22,11 @@ class AuthController extends Controller
             'password' => bcrypt($fields['password'])
         ]);
 
-        $token = $user->createToken('myapptoken')->plainTextToken;
+        // $token = $user->createToken('myapptoken')->plainTextToken;
 
         $response = [
             'user' => $user,
-            'token' => $token
+            // 'token' => $token
         ];
 
         return response($response, 201);
@@ -52,11 +52,11 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // $token = $user->createToken('myapptoken')->plainTextToken;
+        $token = $user->createToken('myapptoken')->plainTextToken;
 
         $response = [
             'user' => $user,
-            // 'token' => $token
+            'token' => $token
         ];
 
         return response($response, 201);
