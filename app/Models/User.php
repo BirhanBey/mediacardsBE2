@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Model;
+
 
 class User extends Authenticatable
 {
@@ -17,11 +19,7 @@ class User extends Authenticatable
      *
      * @var array
      */
-    protected $fillable = [
-        'userName',
-        'email',
-        'password',
-    ];
+    protected $fillable = ['userName', 'email', 'password', 'img', 'description', 'url'];
 
     /**
      * The attributes that should be hidden for arrays.
@@ -41,4 +39,19 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function urls()
+    {
+        return $this->hasMany(Url::class);
+    }
+}
+// app/Models/Url.php
+class Url extends Model
+{
+    protected $fillable = ['name', 'link', 'active'];
+    
+    public function account()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
