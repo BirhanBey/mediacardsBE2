@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    // new user registeration
     public function register(Request $request)
     {
         $fields = $request->validate([
@@ -22,18 +23,18 @@ class AuthController extends Controller
             'password' => bcrypt($fields['password'])
         ]);
 
-        $token = $user->createToken('myapptoken')->plainTextToken;
+        // $token = $user->createToken('myapptoken')->plainTextToken;
 
         $response = [
             'user' => $user,
-            'token' => $token
+            // 'token' => $token
         ];
 
         return response($response, 201);
     }
 
     /**
-     * Login
+     * user login and token creation
      */
     public function login(Request $request)
     {
@@ -65,7 +66,7 @@ class AuthController extends Controller
 
 
     /**
-     * Display a listing of the resource.
+     * get all users
      */
     public function index()
     {
@@ -93,7 +94,7 @@ class AuthController extends Controller
         return response()->json($users);
     }
     /**
-     * Display the specified resource.
+     * get specified user by id
      */
     public function show($id)
     {
@@ -119,7 +120,7 @@ class AuthController extends Controller
     }
 
     /**
-     * search for a name
+     * search user by name
      */
     public function search(string $name)
     {
@@ -127,7 +128,7 @@ class AuthController extends Controller
     }
 
     /**
-     * add new url.
+     * create new url
      */
     public function url_post(Request $request, $id)
     {
@@ -154,7 +155,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * change the information of user by id
      */
     public function update(Request $request, string $id)
     {
@@ -164,7 +165,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Update the specified url in user.
+     * change the informations of url by id
      */
     public function url_update(Request $request, string $id, string $url_id)
     {
@@ -178,9 +179,17 @@ class AuthController extends Controller
         $url->update($request->all());
         return $url;
     }
+    
+    /**
+     * delete selected user by id
+     */
+    public function destroy(string $id)
+    {
+        return User::destroy($id);
+    }
 
     /**
-     * Delete the specified url in user.
+     * delete selected url by id
      */
     public function url_destroy($id, $url_id)
     {
@@ -194,15 +203,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        return User::destroy($id);
-    }
-
-    /**
-     * logout 
+     * user logout and token destroy 
      */
     public function logout(Request $request)
     {
