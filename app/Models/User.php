@@ -45,7 +45,6 @@ class User extends Authenticatable
         return $this->hasMany(Url::class);
     }
 }
-// app/Models/Url.php
 class Url extends Model
 {
     protected $fillable = ['name', 'link', 'active'];

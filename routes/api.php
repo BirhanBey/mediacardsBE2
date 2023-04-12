@@ -13,24 +13,24 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 // get all users
 Route::get('/users', [AuthController::class, 'index']);
-// get specified user
+// get specified user by id
 Route::get('/users/{id}', [AuthController::class, 'show']);
 // search user by name
 Route::get('/users/search/{name}', [AuthController::class, 'search']);
 
 // protected routes
 Route::group(['middleware' => ['auth:sanctum']], function () {
-    // create new url list
+    // create new url 
     Route::post('/users/{id}', [AuthController::class, 'url_post'])->middleware('auth', 'check_user_ownership');
-    // change the informations of user by id
+    // change the information of user by id
     Route::put('/users/{id}', [AuthController::class, 'update'])->middleware('auth', 'check_user_ownership');
-    // change the informations of url table by id
+    // change the informations of url by id
     Route::put('/users/{id}/urls/{url_id}', [AuthController::class, 'url_update'])->middleware('auth', 'check_user_ownership');
-    // delete item from users table
+    // delete selected user by id
     Route::delete('/users/{id}', [AuthController::class, 'destroy'])->middleware('auth', 'check_user_ownership');
-    // delete item from url table
+    // delete selected url by id
     Route::delete('/users/{id}/urls/{url_id}', [AuthController::class, 'url_destroy'])->middleware('auth', 'check_user_ownership');
-    // user logout
+    // user logout and token destroy
     Route::post('/logout', [AuthController::class, 'logout']);
     
     // // sent a new record to accounts table
