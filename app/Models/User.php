@@ -47,10 +47,11 @@ class User extends Authenticatable
 }
 class Url extends Model
 {
-    protected $fillable = ['name', 'link', 'isActive'];
-    
+    protected $fillable = ['name', 'link', 'isActive', 'description'];
+
     public function account()
     {
         return $this->belongsTo(User::class);
     }
 }
+

@@ -34,7 +34,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // user logout and token destroy
     Route::post('/logout', [AuthController::class, 'logout']);
     //add profile picture   
-    Route::post('/users/{id}/pic', [AuthController::class, 'storeImage']);
+    Route::post('/users/{id}/pic', [AuthController::class, 'storeImage'])->middleware('auth', 'check_user_ownership');
 
     // // sent a new record to accounts table
     // Route::post('/accounts', [AccountController::class, 'store']);

@@ -80,6 +80,7 @@ class AuthController extends Controller
                     'name' => $url->name,
                     'link' => $url->link,
                     'isActive' => $url->isActive,
+                    'description' => $url->description,
                 ];
             });
             return [
@@ -108,6 +109,7 @@ class AuthController extends Controller
                 'name' => $url->name,
                 'link' => $url->link,
                 'isActive' => $url->isActive,
+                'description' => $url->description,
             ];
         });
         return response()->json([
@@ -138,6 +140,7 @@ class AuthController extends Controller
         $name = $request->input('name');
         $link = $request->input('link');
         $isActive = $request->input('isActive');
+        $description = $request->input('description');
 
         if (!$name || !$link) {
             return response()->json([
@@ -149,7 +152,8 @@ class AuthController extends Controller
         $user->urls()->create([
             "name" => $name,
             "link" => $link,
-            "isActive" => $isActive
+            "isActive" => $isActive,
+            "description" => $description,
         ]);
 
         return response()->json([
@@ -179,9 +183,19 @@ class AuthController extends Controller
             return response()->json(['message' => 'URL not found'], 404);
         }
 
-        $url->update($request->all());
-        return $url;
+        $url->name = request()->input('name', $url->name);
+        $url->link = request()->input('link', $url->link);
+        $url->isActive = request()->input('isActive', $url->isActive);
+        $url->description = request()->input('description', $url->description);
+
+        $url->save();
+
+        return response()->json([
+            'message' => 'URL updated successfully',
+            $url
+        ]);
     }
+
 
     /**
      * delete selected user by id
@@ -246,7 +260,6 @@ class AuthController extends Controller
         }
         // If the user does not have an image, return a 404 error response
         return response()->json(['error' => 'Image not found'], 404);
-
     }
 
     // Store Image
