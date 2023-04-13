@@ -217,14 +217,37 @@ class AuthController extends Controller
         ];
     }
 
-    // View File To Upload Image
-    public function indexWeb()
+    // View Uploaded Image
+    public function indexWeb(Request $request, $id)
     {
-        $users = User::get()->map(function ($user) {
-            return ['image' => $user->image];
-        });
-    }
+        // Get the user with the given ID
+        $user = User::findOrFail($id);
 
+        // Check if the user has an image
+        if ($user->image) {
+            // Get the image path
+            $imagePath = storage_path('app/public/' . $user->image);
+
+            // Check if the image file exists
+            if (file_exists($imagePath)) {
+                // Read the image file contents
+                $imageData = file_get_contents($imagePath);
+
+                // Get the image MIME type
+                $mimeType = mime_content_type($imagePath);
+
+                // Create the response object with image contents and MIME type
+                $response = response($imageData, 200)
+                    ->header('Content-Type', $mimeType);
+
+                // Return the response object
+                return $response;
+            }
+        }
+        // If the user does not have an image, return a 404 error response
+        return response()->json(['error' => 'Image not found'], 404);
+
+    }
 
     // Store Image
     public function storeImage(StoreImageRequest $request, string $id)

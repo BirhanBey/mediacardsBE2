@@ -16,6 +16,8 @@ Route::get('/users', [AuthController::class, 'index']);
 Route::get('/users/{id}', [AuthController::class, 'show']);
 // search user by name
 Route::get('/users/search/{name}', [AuthController::class, 'search']);
+//get Profile name
+Route::get('/users/{id}/pic', [AuthController::class, 'indexWeb']);
 
 // protected routes
 Route::group(['middleware' => ['auth:sanctum']], function () {
@@ -31,19 +33,12 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::delete('/users/{id}/urls/{url_id}', [AuthController::class, 'url_destroy'])->middleware('auth', 'check_user_ownership');
     // user logout and token destroy
     Route::post('/logout', [AuthController::class, 'logout']);
+    //add profile picture   
+    Route::post('/users/{id}/pic', [AuthController::class, 'storeImage']);
 
     // // sent a new record to accounts table
     // Route::post('/accounts', [AccountController::class, 'store']);
-
-    //add profile picture   
-    Route::post('/users/{id}/pic', [AuthController::class, 'storeImage']);
-    //get Profile name
-    Route::get('/users/{id}/pic', [AuthController::class, 'indexWeb']);
-
 });
-
-
-
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
