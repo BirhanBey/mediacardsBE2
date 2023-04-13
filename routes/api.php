@@ -16,7 +16,7 @@ Route::get('/users', [AuthController::class, 'index']);
 Route::get('/users/{id}', [AuthController::class, 'show']);
 // search user by name
 Route::get('/users/search/{name}', [AuthController::class, 'search']);
-//get Profile name
+//get profile picture
 Route::get('/users/{id}/pic', [AuthController::class, 'indexWeb']);
 
 // protected routes
