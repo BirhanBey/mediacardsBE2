@@ -220,59 +220,37 @@ class AuthController extends Controller
     // View File To Upload Image
     public function indexWeb()
     {
-        return view('image-form');
+        $users = User::get()->map(function ($user) {
+            return ['image' => $user->image];
+        });
     }
+
 
     // Store Image
     public function storeImage(StoreImageRequest $request, string $id)
     {
         try {
-            $imageName = time() . "." . $request->image->extension();
+            // create new ImageName
+            $imageName = Str::random(12) . '.' . $request->image->getClientOriginalExtension();
 
-            //Create Post
+            // save the image in to public disk
+            $request->file('image')->storeAs('public', $imageName);
 
+            // Find the user and refresh the image field
             $user = User::findOrFail($id);
-            $user->update($request->all());
+            $user->image = $imageName;
+            $user->save();
 
-            // User::create([
-            //     'image' => $imageName
-            // ]);
-
-            //save Image in storage folder
-            Storage::disk('public')->put($imageName, file_get_contents($request->image));
-
-            //return Json response
+            // return Json
             return response()->json([
                 'message' => 'Image succesfully added! 👍'
             ], 200);
         } catch (\Exception $e) {
 
-            //Return Json Response
+            // return Json
             return response()->json([
                 'message' => 'something went really wrong! 👎'
             ], 500);
         }
-
-
-        //  $request->validate([
-        //      'image' => 'required|image|mimes:png,jpg,jpeg|max:2048'
-        //  ]);
-
-        //  $imageName = time() . '.' . $request->image->extension();
-
-        //  // Public Folder
-        //  $request->image->move(public_path('images'), $imageName);
-
-        //  // //Store in Storage Folder
-        //  // $request->image->storeAs('images', $imageName);
-
-        //  // // Store in S3
-        //  // $request->image->storeAs('images', $imageName, 's3');
-
-        //  //Store Image in DB 
-
-
-        //  return back()->with('success', 'Image uploaded Successfully!')
-        //      ->with('image', $imageName);
     }
 }

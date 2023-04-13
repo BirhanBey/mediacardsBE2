@@ -31,13 +31,17 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::delete('/users/{id}/urls/{url_id}', [AuthController::class, 'url_destroy'])->middleware('auth', 'check_user_ownership');
     // user logout and token destroy
     Route::post('/logout', [AuthController::class, 'logout']);
-    
+
     // // sent a new record to accounts table
     // Route::post('/accounts', [AccountController::class, 'store']);
-    
-    
+
+    //add profile picture   
     Route::post('/users/{id}/pic', [AuthController::class, 'storeImage']);
+    //get Profile name
+    Route::get('/users/{id}/pic', [AuthController::class, 'indexWeb']);
+
 });
+
 
 
 
