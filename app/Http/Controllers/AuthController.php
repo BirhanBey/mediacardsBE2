@@ -79,7 +79,7 @@ class AuthController extends Controller
                     'id' => $url->id,
                     'name' => $url->name,
                     'link' => $url->link,
-                    'active' => $url->isActive,
+                    'isActive' => $url->isActive,
                 ];
             });
             return [
@@ -107,7 +107,7 @@ class AuthController extends Controller
                 'id' => $url->id,
                 'name' => $url->name,
                 'link' => $url->link,
-                'active' => $url->isActive,
+                'isActive' => $url->isActive,
             ];
         });
         return response()->json([
