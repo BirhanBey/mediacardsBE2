@@ -19,7 +19,7 @@ class User extends Authenticatable
      *
      * @var array
      */
-    protected $fillable = ['userName', 'email', 'password', 'img', 'description', 'url'];
+    protected $fillable = ['userName', 'email', 'password', 'image', 'description', 'url'];
 
     /**
      * The attributes that should be hidden for arrays.
@@ -47,7 +47,7 @@ class User extends Authenticatable
 }
 class Url extends Model
 {
-    protected $fillable = ['name', 'link', 'active'];
+    protected $fillable = ['name', 'link', 'isActive'];
     
     public function account()
     {

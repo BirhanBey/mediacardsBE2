@@ -30,7 +30,7 @@ return new class extends Migration
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
             $table->string('link');
             $table->string('name');
-            $table->boolean('isActive')->default(false);
+            $table->boolean('isActive')->default('false');
             $table->timestamps();
         });
     }

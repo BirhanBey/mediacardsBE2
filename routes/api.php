@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -35,9 +34,12 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     
     // // sent a new record to accounts table
     // Route::post('/accounts', [AccountController::class, 'store']);
-
-
+    
+    
+    Route::post('/users/{id}/pic', [AuthController::class, 'storeImage']);
 });
+
+
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();

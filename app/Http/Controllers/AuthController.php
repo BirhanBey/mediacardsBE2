@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\StoreImageRequest;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -83,7 +86,7 @@ class AuthController extends Controller
                 'id_user' => $user->id,
                 'userName' => $user->userName,
                 'email' => $user->email,
-                'img' => $user->img,
+                'image' => $user->image,
                 'description' => $user->description,
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,
@@ -111,7 +114,7 @@ class AuthController extends Controller
             'id_account' => $user->id,
             'userName' => $user->userName,
             'email' => $user->email,
-            'img' => $user->img,
+            'image' => $user->image,
             'description' => $user->description,
             'created_at' => $user->created_at,
             'updated_at' => $user->updated_at,
@@ -134,9 +137,9 @@ class AuthController extends Controller
     {
         $name = $request->input('name');
         $link = $request->input('link');
-        $isActive = $request->input('active');
+        $isActive = $request->input('isActive');
 
-        if (!$name || !$link || !$isActive) {
+        if (!$name || !$link) {
             return response()->json([
                 'message' => 'Required parameters missing',
             ], 400);
@@ -179,7 +182,7 @@ class AuthController extends Controller
         $url->update($request->all());
         return $url;
     }
-    
+
     /**
      * delete selected user by id
      */
@@ -212,5 +215,64 @@ class AuthController extends Controller
         return [
             'message' => 'Logged out'
         ];
+    }
+
+    // View File To Upload Image
+    public function indexWeb()
+    {
+        return view('image-form');
+    }
+
+    // Store Image
+    public function storeImage(StoreImageRequest $request, string $id)
+    {
+        try {
+            $imageName = time() . "." . $request->image->extension();
+
+            //Create Post
+
+            $user = User::findOrFail($id);
+            $user->update($request->all());
+
+            // User::create([
+            //     'image' => $imageName
+            // ]);
+
+            //save Image in storage folder
+            Storage::disk('public')->put($imageName, file_get_contents($request->image));
+
+            //return Json response
+            return response()->json([
+                'message' => 'Image succesfully added! 👍'
+            ], 200);
+        } catch (\Exception $e) {
+
+            //Return Json Response
+            return response()->json([
+                'message' => 'something went really wrong! 👎'
+            ], 500);
+        }
+
+
+        //  $request->validate([
+        //      'image' => 'required|image|mimes:png,jpg,jpeg|max:2048'
+        //  ]);
+
+        //  $imageName = time() . '.' . $request->image->extension();
+
+        //  // Public Folder
+        //  $request->image->move(public_path('images'), $imageName);
+
+        //  // //Store in Storage Folder
+        //  // $request->image->storeAs('images', $imageName);
+
+        //  // // Store in S3
+        //  // $request->image->storeAs('images', $imageName, 's3');
+
+        //  //Store Image in DB 
+
+
+        //  return back()->with('success', 'Image uploaded Successfully!')
+        //      ->with('image', $imageName);
     }
 }
