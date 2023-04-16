@@ -66,8 +66,6 @@ class AuthController extends Controller
         return response($response, 201);
     }
 
-
-
     /**
      * get all users
      */
@@ -138,13 +136,30 @@ class AuthController extends Controller
     public function url_post(Request $request, $id)
     {
         $name = $request->input('name');
-        $link = $request->input('link');
+        $link = 'https://' . $request->input('link');
         $isActive = $request->input('isActive');
         $description = $request->input('description');
 
+        // Required parameters check
         if (!$name || !$link) {
             return response()->json([
                 'message' => 'Required parameters missing',
+            ], 400);
+        }
+
+        // URL validation
+        if (!filter_var($link, FILTER_VALIDATE_URL)) {
+            return response()->json([
+                'message' => 'This is not a valid link!',
+            ], 400);
+        }
+
+        // Check if the domain of the URL matches the name
+        $parsedUrl = parse_url($link);
+        $domain = strtolower(preg_replace('/^www\./', '', $parsedUrl['host']));
+        if ($domain !== strtolower($name) . '.com') {
+            return response()->json([
+                'message' => 'The domain does not match the name!',
             ], 400);
         }
 
@@ -176,6 +191,32 @@ class AuthController extends Controller
      */
     public function url_update(Request $request, string $id, string $url_id)
     {
+        $name = $request->input('name');
+        $link = 'https://' . $request->input('link');
+
+        // Required parameters check
+        if (!$name || !$link) {
+            return response()->json([
+                'message' => 'Required parameters missing',
+            ], 400);
+        }
+
+        // URL validation
+        if (!filter_var($link, FILTER_VALIDATE_URL)) {
+            return response()->json([
+                'message' => 'This is not a valid link!',
+            ], 400);
+        }
+
+        // Check if the domain of the URL matches the name
+        $parsedUrl = parse_url($link);
+        $domain = strtolower(preg_replace('/^www\./', '', $parsedUrl['host']));
+        if ($domain !== strtolower($name) . '.com') {
+            return response()->json([
+                'message' => 'The domain does not match the name!',
+            ], 400);
+        }
+
         $user = User::findOrFail($id);
         $url = $user->urls()->find($url_id);
 
@@ -293,20 +334,25 @@ class AuthController extends Controller
     // Sset new password
     public function updatePassword(Request $request, $id)
     {
+        // Find the user by id
         $user = User::findOrFail($id);
 
+        //
         $request->validate([
             'password' => 'required|string|confirmed',
             'old_password' => 'required|string'
         ]);
 
+        //check if old password is matching with DB
         if (!Hash::check($request->input('old_password'), $user->password)) {
             return response(['message' => 'Old password is incorrect'], 401);
         }
 
+        // save the new encrypted password
         $user->password = Hash::make($request->input('password'));
         $user->save();
 
+        // return a message if password succesfully changed
         return response(['message' => 'Password updated successfully']);
     }
 }
