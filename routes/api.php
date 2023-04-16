@@ -35,6 +35,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     //add profile picture   
     Route::post('/users/{id}/pic', [AuthController::class, 'storeImage'])->middleware('auth', 'check_user_ownership');
+    //set new password
+    Route::put('/users/{id}/pass', [AuthController::class, 'updatePassword'])->middleware('auth', 'check_user_ownership');
 
     // // sent a new record to accounts table
     // Route::post('/accounts', [AccountController::class, 'store']);

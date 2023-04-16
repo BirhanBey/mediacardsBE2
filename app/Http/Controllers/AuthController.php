@@ -289,4 +289,24 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+    // Sset new password
+    public function updatePassword(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $request->validate([
+            'password' => 'required|string|confirmed',
+            'old_password' => 'required|string'
+        ]);
+
+        if (!Hash::check($request->input('old_password'), $user->password)) {
+            return response(['message' => 'Old password is incorrect'], 401);
+        }
+
+        $user->password = Hash::make($request->input('password'));
+        $user->save();
+
+        return response(['message' => 'Password updated successfully']);
+    }
 }
