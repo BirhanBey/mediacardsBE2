@@ -78,7 +78,9 @@ class AuthController extends Controller
                     'name' => $url->name,
                     'link' => $url->link,
                     'isActive' => $url->isActive,
-                    'description' => $url->description,
+                    'description' => $url->description,                    
+                    'icon' => $url->icon,
+                    'theme' => $url->theme,
                 ];
             });
             return [
@@ -108,6 +110,8 @@ class AuthController extends Controller
                 'link' => $url->link,
                 'isActive' => $url->isActive,
                 'description' => $url->description,
+                'icon' => $url->icon,
+                'theme' => $url->theme,
             ];
         });
         return response()->json([
@@ -139,6 +143,8 @@ class AuthController extends Controller
         $link = 'https://' . $request->input('link');
         $isActive = $request->input('isActive');
         $description = $request->input('description');
+        $icon = $request->input('icon');
+        $theme = $request->input('theme');
 
         // Required parameters check
         if (!$name || !$link) {
@@ -168,6 +174,8 @@ class AuthController extends Controller
             "name" => $name,
             "link" => $link,
             "isActive" => $isActive,
+            'icon' => $icon,
+            'theme' => $theme,
             "description" => $description,
         ]);
 
@@ -228,6 +236,9 @@ class AuthController extends Controller
         $url->link = request()->input('link', $url->link);
         $url->isActive = request()->input('isActive', $url->isActive);
         $url->description = request()->input('description', $url->description);
+        $url->icon = request()->input('icon', $url->icon);
+        $url->theme = request()->input('theme', $url->theme);
+
 
         $url->save();
 

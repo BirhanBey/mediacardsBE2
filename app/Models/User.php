@@ -47,7 +47,7 @@ class User extends Authenticatable
 }
 class Url extends Model
 {
-    protected $fillable = ['name', 'link', 'isActive', 'description'];
+    protected $fillable = ['name', 'link', 'isActive', 'description', 'icon', 'theme'];
 
     public function account()
     {
