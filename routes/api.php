@@ -19,6 +19,11 @@ Route::get('/users/search/{name}', [AuthController::class, 'search']);
 //get profile picture
 Route::get('/users/{id}/pic', [AuthController::class, 'indexWeb']);
 
+
+Route::get('/{userName}', function ($userName) {
+    return view('index', ['https://s10.syntradeveloper.be/index.html' => '/'.$userName]);
+});
+
 // protected routes
 Route::group(['middleware' => ['auth:sanctum']], function () {
     // create new url 
