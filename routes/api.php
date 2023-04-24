@@ -20,11 +20,8 @@ Route::get('/users/search/{name}', [AuthController::class, 'search']);
 Route::get('/users/{id}/pic', [AuthController::class, 'indexWeb']);
 
 
-Route::get('/{userName}', function ($userName) {
-    return view('index', ['https://s10.syntradeveloper.be/index.html' => '/'.$userName]);
-});
-
 // protected routes
+
 Route::group(['middleware' => ['auth:sanctum']], function () {
     // create new url 
     Route::post('/users/{id}', [AuthController::class, 'url_post'])->middleware('auth', 'check_user_ownership');
