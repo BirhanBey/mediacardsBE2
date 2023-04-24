@@ -17,20 +17,19 @@ class AuthController extends Controller
         $fields = $request->validate([
             'userName' => 'required|string',
             'email' => 'required|string|unique:users,email',
-            'password' => 'required|string|confirmed'
+            'password' => 'required|string|confirmed',
+            'description' => 'nullable|string' 
         ]);
 
         $user = User::create([
             'userName' => $fields['userName'],
             'email' => $fields['email'],
-            'password' => bcrypt($fields['password'])
-        ]);
-
-        // $token = $user->createToken('myapptoken')->plainTextToken;
+            'password' => bcrypt($fields['password']),
+            'description' => $fields['description'] // yeni değer ataması
+        ]);       
 
         $response = [
-            'user' => $user,
-            // 'token' => $token
+            'user' => $user            
         ];
 
         return response($response, 201);
@@ -134,6 +133,7 @@ class AuthController extends Controller
         return User::where('userName', 'like', '%' . $name . '%')->get();
     }
 
+
     /**
      * create new url
      */
@@ -163,11 +163,20 @@ class AuthController extends Controller
         // Check if the domain of the URL matches the name
         $parsedUrl = parse_url($link);
         $domain = strtolower(preg_replace('/^www\./', '', $parsedUrl['host']));
-        if ($domain !== strtolower($name) . '.com') {
+        $validExtensions = ['.com', '.be', '.com.tr', '.edu', '.org', '.net', '.gov', '.nl', '.io', '.info', '.tv', '.fr', '.cn', '.ru', '.es', '.au', '.name', '.us', '.co', '.uk', '.me', '.de']; // Add more if needed
+        $valid = false;
+        foreach ($validExtensions as $ext) {
+            if (strpos($domain, strtolower($name) . $ext) !== false) {
+                $valid = true;
+                break;
+            }
+        }
+        if (!$valid) {
             return response()->json([
                 'message' => 'The domain does not match the name!',
             ], 400);
         }
+
 
         $user = User::findOrFail($id);
         $user->urls()->create([
@@ -219,7 +228,15 @@ class AuthController extends Controller
         // Check if the domain of the URL matches the name
         $parsedUrl = parse_url($link);
         $domain = strtolower(preg_replace('/^www\./', '', $parsedUrl['host']));
-        if ($domain !== strtolower($name) . '.com') {
+        $validExtensions = ['.com', '.be', '.com.tr', '.edu', '.org', '.net', '.gov', '.nl', '.io', '.info', '.tv', '.fr', '.cn', '.ru', '.es', '.au', '.name', '.us', '.co', '.uk', '.me', '.de']; // Add more if needed
+        $valid = false;
+        foreach ($validExtensions as $ext) {
+            if (strpos($domain, strtolower($name) . $ext) !== false) {
+                $valid = true;
+                break;
+            }
+        }
+        if (!$valid) {
             return response()->json([
                 'message' => 'The domain does not match the name!',
             ], 400);
