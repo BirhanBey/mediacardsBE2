@@ -140,26 +140,31 @@ class AuthController extends Controller
     public function url_post(Request $request, $id)
     {
         $name = $request->input('name');
-        $link = 'https://' . $request->input('link');
+        $link = $request->input('link');
         $isActive = $request->input('isActive');
         $description = $request->input('description');
         $icon = $request->input('icon');
         $theme = $request->input('theme');
-
+    
         // Required parameters check
         if (!$name || !$link) {
             return response()->json([
                 'message' => 'Required parameters missing',
             ], 400);
         }
-
+    
+        // Check if the link starts with "https://"
+        if (strpos($link, "https://") === false) {
+            $link = "https://" . $link;
+        }
+    
         // URL validation
         if (!filter_var($link, FILTER_VALIDATE_URL)) {
             return response()->json([
                 'message' => 'This is not a valid link!',
             ], 400);
         }
-
+    
         // Check if the domain of the URL matches the name
         $parsedUrl = parse_url($link);
         $domain = strtolower(preg_replace('/^www\./', '', $parsedUrl['host']));
@@ -176,8 +181,8 @@ class AuthController extends Controller
                 'message' => 'The domain does not match the name!',
             ], 400);
         }
-
-
+    
+    
         $user = User::findOrFail($id);
         $user->urls()->create([
             "name" => $name,
@@ -187,11 +192,11 @@ class AuthController extends Controller
             'theme' => $theme,
             "description" => $description,
         ]);
-
+    
         return response()->json([
             'message' => 'New URL added successfully',
         ]);
-    }
+    }  
 
     /**
      * change the information of user by id
@@ -209,7 +214,7 @@ class AuthController extends Controller
     public function url_update(Request $request, string $id, string $url_id)
     {
         $name = $request->input('name');
-        $link = 'https://' . $request->input('link');
+        $link = $request->input('link');
 
         // Required parameters check
         if (!$name || !$link) {
@@ -217,13 +222,19 @@ class AuthController extends Controller
                 'message' => 'Required parameters missing',
             ], 400);
         }
-
+        
+        // Check if the link starts with "https://"
+        if (strpos($link, "https://") === false) {
+            $link = "https://" . $link;
+        }
+        
         // URL validation
         if (!filter_var($link, FILTER_VALIDATE_URL)) {
             return response()->json([
                 'message' => 'This is not a valid link!',
             ], 400);
         }
+
 
         // Check if the domain of the URL matches the name
         $parsedUrl = parse_url($link);
@@ -262,6 +273,11 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'URL updated successfully',
             $url
+        ]);
+
+        return response()->json([
+            'message' => 'URL updated successfully',
+            'url' => url('users/' . $id . '/urls/' . $url_id)
         ]);
     }
 
