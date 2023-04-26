@@ -1,3 +1,8 @@
+## API Documentation
+
+- You can find the documentation of the API, [here](https://documenter.getpostman.com/view/25291324/2s93Y5R1LA#intro).
+
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">

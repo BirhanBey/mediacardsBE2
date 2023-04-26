@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\StoreImageRequest;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -14,20 +17,19 @@ class AuthController extends Controller
         $fields = $request->validate([
             'userName' => 'required|string',
             'email' => 'required|string|unique:users,email',
-            'password' => 'required|string|confirmed'
+            'password' => 'required|string|confirmed',
+            'description' => 'nullable|string' 
         ]);
 
         $user = User::create([
             'userName' => $fields['userName'],
             'email' => $fields['email'],
-            'password' => bcrypt($fields['password'])
-        ]);
-
-        // $token = $user->createToken('myapptoken')->plainTextToken;
+            'password' => bcrypt($fields['password']),
+            'description' => $fields['description'] // yeni değer ataması
+        ]);       
 
         $response = [
-            'user' => $user,
-            // 'token' => $token
+            'user' => $user            
         ];
 
         return response($response, 201);
@@ -63,8 +65,6 @@ class AuthController extends Controller
         return response($response, 201);
     }
 
-
-
     /**
      * get all users
      */
@@ -76,14 +76,17 @@ class AuthController extends Controller
                     'id' => $url->id,
                     'name' => $url->name,
                     'link' => $url->link,
-                    'active' => $url->isActive,
+                    'isActive' => $url->isActive,
+                    'description' => $url->description,                    
+                    'icon' => $url->icon,
+                    'theme' => $url->theme,
                 ];
             });
             return [
                 'id_user' => $user->id,
                 'userName' => $user->userName,
                 'email' => $user->email,
-                'img' => $user->img,
+                'image' => $user->image,
                 'description' => $user->description,
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,
@@ -104,14 +107,17 @@ class AuthController extends Controller
                 'id' => $url->id,
                 'name' => $url->name,
                 'link' => $url->link,
-                'active' => $url->isActive,
+                'isActive' => $url->isActive,
+                'description' => $url->description,
+                'icon' => $url->icon,
+                'theme' => $url->theme,
             ];
         });
         return response()->json([
             'id_account' => $user->id,
             'userName' => $user->userName,
             'email' => $user->email,
-            'img' => $user->img,
+            'image' => $user->image,
             'description' => $user->description,
             'created_at' => $user->created_at,
             'updated_at' => $user->updated_at,
@@ -127,6 +133,7 @@ class AuthController extends Controller
         return User::where('userName', 'like', '%' . $name . '%')->get();
     }
 
+
     /**
      * create new url
      */
@@ -134,25 +141,62 @@ class AuthController extends Controller
     {
         $name = $request->input('name');
         $link = $request->input('link');
-        $isActive = $request->input('active');
-
-        if (!$name || !$link || !$isActive) {
+        $isActive = $request->input('isActive');
+        $description = $request->input('description');
+        $icon = $request->input('icon');
+        $theme = $request->input('theme');
+    
+        // Required parameters check
+        if (!$name || !$link) {
             return response()->json([
                 'message' => 'Required parameters missing',
             ], 400);
         }
-
+    
+        // Check if the link starts with "https://"
+        if (strpos($link, "https://") === false) {
+            $link = "https://" . $link;
+        }
+    
+        // URL validation
+        if (!filter_var($link, FILTER_VALIDATE_URL)) {
+            return response()->json([
+                'message' => 'This is not a valid link!',
+            ], 400);
+        }
+    
+        // Check if the domain of the URL matches the name
+        $parsedUrl = parse_url($link);
+        $domain = strtolower(preg_replace('/^www\./', '', $parsedUrl['host']));
+        $validExtensions = ['.com', '.be', '.com.tr', '.edu', '.org', '.net', '.gov', '.nl', '.io', '.info', '.tv', '.fr', '.cn', '.ru', '.es', '.au', '.name', '.us', '.co', '.uk', '.me', '.de']; // Add more if needed
+        $valid = false;
+        foreach ($validExtensions as $ext) {
+            if (strpos($domain, strtolower($name) . $ext) !== false) {
+                $valid = true;
+                break;
+            }
+        }
+        if (!$valid) {
+            return response()->json([
+                'message' => 'The domain does not match the name!',
+            ], 400);
+        }
+    
+    
         $user = User::findOrFail($id);
         $user->urls()->create([
             "name" => $name,
             "link" => $link,
-            "isActive" => $isActive
+            "isActive" => $isActive,
+            'icon' => $icon,
+            'theme' => $theme,
+            "description" => $description,
         ]);
-
+    
         return response()->json([
             'message' => 'New URL added successfully',
         ]);
-    }
+    }  
 
     /**
      * change the information of user by id
@@ -169,6 +213,46 @@ class AuthController extends Controller
      */
     public function url_update(Request $request, string $id, string $url_id)
     {
+        $name = $request->input('name');
+        $link = $request->input('link');
+
+        // Required parameters check
+        if (!$name || !$link) {
+            return response()->json([
+                'message' => 'Required parameters missing',
+            ], 400);
+        }
+        
+        // Check if the link starts with "https://"
+        if (strpos($link, "https://") === false) {
+            $link = "https://" . $link;
+        }
+        
+        // URL validation
+        if (!filter_var($link, FILTER_VALIDATE_URL)) {
+            return response()->json([
+                'message' => 'This is not a valid link!',
+            ], 400);
+        }
+
+
+        // Check if the domain of the URL matches the name
+        $parsedUrl = parse_url($link);
+        $domain = strtolower(preg_replace('/^www\./', '', $parsedUrl['host']));
+        $validExtensions = ['.com', '.be', '.com.tr', '.edu', '.org', '.net', '.gov', '.nl', '.io', '.info', '.tv', '.fr', '.cn', '.ru', '.es', '.au', '.name', '.us', '.co', '.uk', '.me', '.de']; // Add more if needed
+        $valid = false;
+        foreach ($validExtensions as $ext) {
+            if (strpos($domain, strtolower($name) . $ext) !== false) {
+                $valid = true;
+                break;
+            }
+        }
+        if (!$valid) {
+            return response()->json([
+                'message' => 'The domain does not match the name!',
+            ], 400);
+        }
+
         $user = User::findOrFail($id);
         $url = $user->urls()->find($url_id);
 
@@ -176,10 +260,28 @@ class AuthController extends Controller
             return response()->json(['message' => 'URL not found'], 404);
         }
 
-        $url->update($request->all());
-        return $url;
+        $url->name = request()->input('name', $url->name);
+        $url->link = request()->input('link', $url->link);
+        $url->isActive = request()->input('isActive', $url->isActive);
+        $url->description = request()->input('description', $url->description);
+        $url->icon = request()->input('icon', $url->icon);
+        $url->theme = request()->input('theme', $url->theme);
+
+
+        $url->save();
+
+        return response()->json([
+            'message' => 'URL updated successfully',
+            $url
+        ]);
+
+        return response()->json([
+            'message' => 'URL updated successfully',
+            'url' => url('users/' . $id . '/urls/' . $url_id)
+        ]);
     }
-    
+
+
     /**
      * delete selected user by id
      */
@@ -212,5 +314,89 @@ class AuthController extends Controller
         return [
             'message' => 'Logged out'
         ];
+    }
+
+    // View Uploaded Image
+    public function indexWeb(Request $request, $id)
+    {
+        // Get the user with the given ID
+        $user = User::findOrFail($id);
+
+        // Check if the user has an image
+        if ($user->image) {
+            // Get the image path
+            $imagePath = storage_path('app/public/' . $user->image);
+
+            // Check if the image file exists
+            if (file_exists($imagePath)) {
+                // Read the image file contents
+                $imageData = file_get_contents($imagePath);
+
+                // Get the image MIME type
+                $mimeType = mime_content_type($imagePath);
+
+                // Create the response object with image contents and MIME type
+                $response = response($imageData, 200)
+                    ->header('Content-Type', $mimeType);
+
+                // Return the response object
+                return $response;
+            }
+        }
+        // If the user does not have an image, return a 404 error response
+        return response()->json(['error' => 'Image not found'], 404);
+    }
+
+    // Store Image
+    public function storeImage(StoreImageRequest $request, string $id)
+    {
+        try {
+            // create new ImageName
+            $imageName = Str::random(12) . '.' . $request->image->getClientOriginalExtension();
+
+            // save the image in to public disk
+            $request->file('image')->storeAs('public', $imageName);
+
+            // Find the user and refresh the image field
+            $user = User::findOrFail($id);
+            $user->image = $imageName;
+            $user->save();
+
+            // return Json
+            return response()->json([
+                'message' => 'Image succesfully added! 👍'
+            ], 200);
+        } catch (\Exception $e) {
+
+            // return Json
+            return response()->json([
+                'message' => 'something went really wrong! 👎'
+            ], 500);
+        }
+    }
+
+    // Sset new password
+    public function updatePassword(Request $request, $id)
+    {
+        // Find the user by id
+        $user = User::findOrFail($id);
+
+        //
+        $request->validate([
+            'password' => 'required|string|confirmed',
+            'old_password' => 'required|string'
+        ]);
+
+        //check if old password is matching with DB
+        if (!Hash::check($request->input('old_password'), $user->password)) {
+            return response(['message' => 'Old password is incorrect'], 401);
+        }
+
+        // save the new encrypted password
+        $user->password = Hash::make($request->input('password'));
+        $user->save();
+
+        // return a message if password succesfully changed
+        return response(['message' => 'Password updated successfully']);
     }
 }

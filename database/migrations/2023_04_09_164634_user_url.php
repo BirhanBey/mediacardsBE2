@@ -29,8 +29,9 @@ return new class extends Migration
             $table->unsignedBigInteger('users_id');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
             $table->string('link');
+            $table->text('description')->nullable();
             $table->string('name');
-            $table->boolean('isActive')->default(false);
+            $table->boolean('isActive')->default(true);
             $table->timestamps();
         });
     }
@@ -42,5 +43,8 @@ return new class extends Migration
     {
         Schema::dropIfExists('urls');
         Schema::dropIfExists('users');
+        Schema::table('urls', function (Blueprint $table) {
+            $table->dropColumn('description');
+        });
     }
 };
